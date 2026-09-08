@@ -1,0 +1,25 @@
+{
+  "name": "sinav-basvuru",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "body-parser": "^2.3.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.6.2",
+    "express-session": "^1.19.0",
+    "multer": "^2.2.0",
+    "pg": "^8.22.0",
+    "xss": "^1.0.15",
+    "xss-clean": "^0.1.4"
+  }
+}

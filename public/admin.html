@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yönetici Paneli - Başvurular</title>
+    <link rel="stylesheet" href="admin_style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<!-- GİRİŞ EKRANI -->
+    <div id="loginScreen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background-color: #f8fafc; display: flex; justify-content: center; align-items: center; z-index: 9999;">
+        <div style="background: white; padding: 50px 50px; border-radius: 12px; box-shadow: 0 15px 35px rgba(0, 107, 63, 0.15); border-top: 8px solid #006b3f; width: 100%; max-width: 550px; text-align: center;">
+            <img src="logo.jpg" alt="BAÜN Logo" style="width: 100px; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto;">
+            <h2 style="color: #006b3f; margin-top: 0; margin-bottom: 12px; font-size: 32px; font-weight: bold;">Yönetim Paneli</h2>
+            <p style="color: #64748b; margin-bottom: 40px; font-size: 16px;">Lütfen yetkili bilgilerinizi giriniz.</p>
+            
+            <div style="margin-bottom: 25px; text-align: left;">
+                <label style="display: block; margin-bottom: 10px; color: #475569; font-weight: 600; font-size: 16px;">Kullanıcı Adı</label>
+                <input type="text" id="adminKullanici" placeholder="Kullanıcı adınız..." style="width: 100%; padding: 16px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; box-sizing: border-box; font-size: 16px;">
+            </div>
+            
+            <div style="margin-bottom: 35px; text-align: left;">
+                <label style="display: block; margin-bottom: 10px; color: #475569; font-weight: 600; font-size: 16px;">Şifre</label>
+                <input type="password" id="adminSifre" placeholder="Şifreniz..." style="width: 100%; padding: 16px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; box-sizing: border-box; font-size: 16px;">
+            </div>
+            
+            <button onclick="sistemeGirisYap()" style="width: 100%; padding: 18px; background-color: #006b3f; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 18px; transition: 0.3s;">Giriş Yap</button>
+            <p id="hataMesaji" style="color: #e53e3e; margin-top: 20px; font-size: 15px; display: none; font-weight: 500;">Kullanıcı adı veya şifre hatalı!</p>
+        </div>
+    </div>
+
+    <!-- ANA PANEL -->
+    <div id="mainDashboard" style="display: none;">
+    <div class="admin-container">
+        <header class="admin-header">
+            <div class="header-left">
+                <img src="logo.jpg" alt="Logo" class="admin-logo">
+                <h2>BAŞVURU YÖNETİM SİSTEMİ</h2>
+            </div>
+            <div class="header-right" style="display: flex; align-items: center; gap: 15px;">
+                <span class="admin-user">Merhaba, Yönetici</span>
+                <button id="durumBtn" onclick="durumDegistir()" style="background-color: #f59e0b; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;">Yükleniyor...</button>
+                <button class="btn-logout">Çıkış Yap</button>
+            </div>
+        </header>
+
+       <!-- İSTATİSTİKLER -->
+        <div class="dashboard-stats" style="margin-bottom: 30px;">
+            <div class="stat-card" style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid #006b3f; display: flex; flex-direction: row; justify-content: space-around; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 15px; flex: 1; justify-content: center; border-right: 1px solid #e2e8f0;">
+                    <h3 style="color: #64748b; font-size: 17px; margin: 0; font-weight: 500;">Toplam Başvuru:</h3>
+                    <p id="totalCount" style="font-size: 30px; font-weight: bold; margin: 0; color: #006b3f;">0</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 15px; flex: 1; justify-content: center; border-right: 1px solid #e2e8f0;">
+                    <h3 style="color: #64748b; font-size: 17px; margin: 0; font-weight: 500;">Son 24 Saat:</h3>
+                    <p id="dailyCount" style="font-size: 30px; font-weight: bold; margin: 0; color: #006b3f;">0</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 15px; flex: 1; justify-content: center;">
+                    <h3 style="color: #64748b; font-size: 17px; margin: 0; font-weight: 500;">Bekleyen Onaylar:</h3>
+                    <p id="pendingCount" style="font-size: 30px; font-weight: bold; margin: 0; color: #006b3f;">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- DİL YÖNETİM PANELİ -->
+        <div style="background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;">
+            <h3 style="margin-top: 0; color: #334155; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">Sınav Dili Yönetimi</h3>
+            <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                <input type="text" id="yeniDilInput" placeholder="Yeni dil adını yazın (Örn: Arapça)" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 15px;">
+                <button onclick="dilEkle()" style="background-color: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s;">+ Dil Ekle</button>
+            </div>
+            <div id="dilListesi" style="display: flex; flex-wrap: wrap; gap: 10px;">
+                <!-- Diller buraya gelecek -->
+            </div>
+        </div>
+
+        <!-- GENİŞ VE FİLTRELENEBİLİR TABLO ALANI -->
+        <div class="table-section" style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <div class="table-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0; color: #334155;">Güncel Başvuru Listesi</h3>
+                <div>
+                    <button onclick="verileriGetir()" style="background-color: #3b82f6; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-right: 10px; transition: 0.2s;">🔄 Tabloyu Güncelle</button>
+                    <button class="btn-export" style="background-color: #10b981; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">Excel'e Aktar</button>
+                </div>
+            </div>
+            
+            <div class="table-responsive" style="overflow-x: auto; width: 100%;">
+                <table id="basvurularTable" style="width: 100%; border-collapse: collapse; min-width: 1400px; text-align: left; font-size: 14px;">
+                    <thead>
+                        <tr style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #475569;">
+                            <th style="padding: 12px 10px;">Başvuru Kodu</th>
+                            <th style="padding: 12px 10px;">Ad Soyad</th>
+                            <th style="padding: 12px 10px;">TC Kimlik</th>
+                            <th style="padding: 12px 10px;">Doğum T.</th>
+                            <th style="padding: 12px 10px;">Doğum Yeri</th>
+                            <th style="padding: 12px 10px;">E-Posta</th>
+                            <th style="padding: 12px 10px;">Öğrenim</th>
+                            <th style="padding: 12px 10px;">Öğrenci No</th>
+                            <th style="padding: 12px 10px;">Fakülte/Bölüm</th>
+                            <th style="padding: 12px 10px;">Mezuniyet Bilgisi</th>
+                            <th style="padding: 12px 10px;">Sınav Dili</th>
+                            <th style="padding: 12px 10px;">Durum</th>
+                            <th style="padding: 12px 10px; text-align: center;">İşlemler</th>
+                        </tr>
+                        <!-- ARAMA KUTULARI -->
+                        <tr style="background-color: #f8fafc; border-bottom: 2px solid #cbd5e1;">
+                            <td style="padding: 5px 10px;"><input type="text" placeholder="Ara..." class="col-search" data-key="gosterim_kodu" style="width: 90%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; outline: none;"></td>
+                            <td style="padding: 5px 10px;"><input type="text" placeholder="Ara..." class="col-search" data-key="ad_soyad" style="width: 90%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; outline: none;"></td>
+                            <td style="padding: 5px 10px;"><input type="text" placeholder="Ara..." class="col-search" data-key="tc_no" style="width: 90%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; outline: none;"></td>
+                            <td style="padding: 5px 10px;"><input type="text" placeholder="Ara..." class="col-search" data-key="dogum_tarihi" style="width: 90%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; outline: none;"></td>
+                            <td style="padding: 5px 10px;"><input type="text" placeholder="Ara..." class="col-search" data-key="dogum_yeri" style="width: 90%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; outline: none;"></td>
+                            <td style="padding: 5px 10px;"><input type="text" placeholder="Ara..." class="col-search" data-key="eposta" style="width: 90%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; outline: none;"></td>
+                            <td style="padding: 5px 10px;"><input type="text" placeholder="Ara..." class="col-search" data-key="ogrenim_durumu" style="width: 90%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; outline: none;"></td>
+                            <td style="padding: 5px 10px;"><input type="text" placeholder="Ara..." class="col-search" data-key="ogrenci_no" style="width: 90%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; outline: none;"></td>
+                            <td style="padding: 5px 10px;"><input type="text" placeholder="Ara..." class="col-search" data-key="fakulte_bolum" style="width: 90%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; outline: none;"></td>
+                            <td style="padding: 5px 10px;"><input type="text" placeholder="Ara..." class="col-search" data-key="mezuniyet" style="width: 90%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; outline: none;"></td>
+                            <td style="padding: 5px 10px;"><input type="text" placeholder="Ara..." class="col-search" data-key="sinav_dili" style="width: 90%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; outline: none;"></td>
+                            <td style="padding: 5px 10px;"><input type="text" placeholder="Ara..." class="col-search" data-key="durum" style="width: 90%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; outline: none;"></td>
+                            <td style="padding: 5px 10px;"></td>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Veriler buraya dinamik olarak gelecek -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script>
+        let basvuruVerileri = [];
+
+        // 11 Haneli Rastgele Kod Üretici
+        function rastgeleKodUret() {
+            const karakterler = 'abcdefghijklmnopqrstuvwxyz0123456789';
+            let sonuc = '';
+            for (let i = 0; i < 11; i++) {
+                sonuc += karakterler.charAt(Math.floor(Math.random() * karakterler.length));
+            }
+            return sonuc;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            verileriGetir();
+            durumKontrolEt(); 
+            olayDinleyicileriniKur();
+            dilleriGetirAdmin(); 
+        });
+
+        async function verileriGetir() {
+            try {
+                const response = await fetch('/api/basvurular');
+                const data = await response.json();
+
+                basvuruVerileri = data.map(satir => ({
+                    ...satir,
+                    kimlik_dosya: satir.kimlik_dosya_yolu,
+                    fotograf: satir.fotograf_yolu,
+                    // Her kayıt için 11 haneli sabit bir görsel kod atıyoruz
+                    gosterim_kodu: rastgeleKodUret()
+                }));
+                
+                tabloyuCiz(basvuruVerileri);
+                istatistikleriGuncelle(basvuruVerileri);
+
+            } catch (hata) {
+                console.error("Veriler çekilirken hata oluştu:", hata);
+                document.getElementById('tableBody').innerHTML = `
+                    <tr><td colspan="13" style="text-align: center; color: #dc2626; padding: 20px;">Sunucu bağlantısı kurulamadı.</td></tr>`;
+            }
+        }
+
+        // --- GÜNCEL TABLO ÇİZİM FONKSİYONU ---
+        function tabloyuCiz(veriler) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = ''; 
+
+            if (veriler.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="13" style="text-align: center; padding: 30px; color: #718096;">Eşleşen kayıt bulunamadı.</td></tr>`;
+                return;
+            }
+
+            veriler.forEach((satir) => {
+                const dogumTarihi = satir.dogum_tarihi ? new Date(satir.dogum_tarihi).toLocaleDateString('tr-TR') : '';
+
+                // Durum rozeti oluşturma
+                let durumRozeti = '';
+                if (satir.durum === 'Onaylandı') {
+                    durumRozeti = '<span style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 12px;">Onaylandı</span>';
+                } else if (satir.durum === 'Reddedildi') {
+                    durumRozeti = `<span style="background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 12px;" title="${satir.red_sebebi || 'Sebep belirtilmedi'}">Reddedildi</span>`;
+                } else {
+                    durumRozeti = '<span style="background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 12px;">Bekliyor</span>';
+                }
+
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = "1px solid #f1f5f9";
+                
+                tr.innerHTML = `
+                    <td style="padding: 12px 10px; color: #3b82f6; font-family: monospace; font-size: 14px; font-weight: bold;">${satir.gosterim_kodu}</td>
+                    <td style="padding: 12px 10px; font-weight: 500;">${satir.ad_soyad || '-'}</td>
+                    <td style="padding: 12px 10px;">${satir.tc_no || '-'}</td>
+                    <td style="padding: 12px 10px;">${dogumTarihi || '-'}</td>
+                    <td style="padding: 12px 10px;">${satir.dogum_yeri || '-'}</td>
+                    <td style="padding: 12px 10px;">${satir.eposta || '-'}</td>
+                    <td style="padding: 12px 10px;">${satir.ogrenim_durumu || '-'}</td>
+                    <td style="padding: 12px 10px;">${satir.ogrenci_no || '-'}</td>
+                    <td style="padding: 12px 10px;">
+                        <div style="font-weight: 500; font-size: 13px;">${satir.fakulte || '-'}</div>
+                        <div style="color: #64748b; font-size: 12px;">${satir.bolum || '-'}</div>
+                    </td>
+                    <td style="padding: 12px 10px;">${satir.mezuniyet || '-'}</td>
+                    <td style="padding: 12px 10px;">${satir.sinav_dili || '-'}</td>
+                    <td style="padding: 12px 10px; text-align: center;">${durumRozeti}</td>
+                    <td style="padding: 12px 10px; text-align: center; display: flex; gap: 10px; justify-content: center;">
+                        <!-- Dosyalar -->
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                            <span style="font-size: 10px; font-weight: 600; color: #64748b;">T.C.</span>
+                            <button onclick="dosyaAc('${satir.kimlik_dosya}')" title="T.C. Kimlik Fotokopisi" style="border: none; background: #e0f2fe; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 15px; transition: 0.2s;">📄</button>
+                        </div>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                            <span style="font-size: 10px; font-weight: 600; color: #64748b;">Foto</span>
+                            <button onclick="dosyaAc('${satir.fotograf}')" title="Vesikalık Fotoğraf" style="border: none; background: #e0f2fe; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 15px; transition: 0.2s;">🖼️</button>
+                        </div>
+                        
+                        <!-- Onay / Red İşlemleri -->
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; margin-left: 5px; border-left: 1px solid #e2e8f0; padding-left: 12px;">
+                            <span style="font-size: 10px; font-weight: 600; color: #16a34a;">Onay</span>
+                            <button onclick="durumGuncelle(${satir.id}, 'Onaylandı')" title="Başvuruyu Onayla" style="border: none; background: #dcfce7; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 15px; transition: 0.2s;">✅</button>
+                        </div>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                            <span style="font-size: 10px; font-weight: 600; color: #dc2626;">Red</span>
+                            <button onclick="durumGuncelle(${satir.id}, 'Reddedildi')" title="Başvuruyu Reddet" style="border: none; background: #fee2e2; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 15px; transition: 0.2s;">❌</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function istatistikleriGuncelle(veriler) {
+            document.getElementById('totalCount').innerText = veriler.length;
+            const son24Saat = new Date(Date.now() - 24 * 60 * 60 * 1000);
+            const yeniBasvurular = veriler.filter(b => new Date(b.basvuru_tarihi) >= son24Saat);
+            document.getElementById('dailyCount').innerText = yeniBasvurular.length;
+            
+            // Bekleyen onayları say
+            const bekleyenler = veriler.filter(b => !b.durum || b.durum === 'Bekliyor');
+            document.getElementById('pendingCount').innerText = bekleyenler.length;
+        }
+
+        async function durumKontrolEt() {
+            try {
+                const res = await fetch('/api/durum');
+                const data = await res.json();
+                butonGuncelle(data.acikMi);
+            } catch (error) {
+                console.error("Durum kontrol hatası:", error);
+                document.getElementById('durumBtn').innerText = "Bağlantı Hatası";
+            }
+        }
+
+        async function durumDegistir() {
+            try {
+                const res = await fetch('/api/durum-degistir', { method: 'POST' });
+                const data = await res.json();
+                butonGuncelle(data.acikMi);
+            } catch (error) {}
+        }
+
+        function butonGuncelle(acikMi) {
+            const btn = document.getElementById('durumBtn');
+            if (acikMi) {
+                btn.innerText = "Başvuruları Kapat";
+                btn.style.backgroundColor = "#ef4444"; 
+                btn.style.color = "white";
+            } else {
+                btn.innerText = "Başvuruları Aç";
+                btn.style.backgroundColor = "#10b981"; 
+                btn.style.color = "white";
+            }
+        }
+
+        // --- SÜTUN BAZLI FİLTRELEME OLAYLARI ---
+        function olayDinleyicileriniKur() {
+            const aramaKutulari = document.querySelectorAll('.col-search');
+            
+            aramaKutulari.forEach(kutu => {
+                kutu.addEventListener('input', () => {
+                    let filtrelenmisVeriler = basvuruVerileri.filter(kayit => {
+                        let eslestiMi = true;
+
+                        aramaKutulari.forEach(input => {
+                            const arananDeger = input.value.toLowerCase().trim();
+                            if (arananDeger === '') return; 
+
+                            const sutunAnahtari = input.getAttribute('data-key');
+                            let kayitDegeri = "";
+
+                            if (sutunAnahtari === 'fakulte_bolum') {
+                                kayitDegeri = ((kayit.fakulte || '') + " " + (kayit.bolum || '')).toLowerCase();
+                            } else if (sutunAnahtari === 'dogum_tarihi') {
+                                kayitDegeri = kayit.dogum_tarihi ? new Date(kayit.dogum_tarihi).toLocaleDateString('tr-TR') : '';
+                            } else {
+                                kayitDegeri = String(kayit[sutunAnahtari] || '').toLowerCase();
+                            }
+
+                            if (!kayitDegeri.includes(arananDeger)) {
+                                eslestiMi = false;
+                            }
+                        });
+                        return eslestiMi;
+                    });
+                    tabloyuCiz(filtrelenmisVeriler);
+                });
+            });
+
+            document.querySelector('.btn-export').addEventListener('click', excelIndir);
+
+            document.querySelector('.btn-logout').addEventListener('click', () => {
+                if(confirm('Oturumu kapatmak istediğinize emin misiniz?')) {
+                    window.location.href = 'admin.html';
+                }
+            });
+        }
+
+        function basvuruIncele(id) {
+            const kayit = basvuruVerileri.find(b => b.id === id);
+            let dogumTarihiFmt = kayit.dogum_tarihi ? new Date(kayit.dogum_tarihi).toLocaleDateString('tr-TR') : 'Belirtilmemiş';
+            let kayitTarihiFmt = kayit.basvuru_tarihi ? new Date(kayit.basvuru_tarihi).toLocaleString('tr-TR') : 'Belirtilmemiş';
+
+            const detaylar = `=== BAŞVURU DETAYLARI ===
+
+KİŞİSEL BİLGİLER
+--------------------------------
+Ad Soyad: ${kayit.ad_soyad || '-'}
+TC Kimlik No: ${kayit.tc_no || '-'}
+Doğum Tarihi: ${dogumTarihiFmt}
+Doğum Yeri: ${kayit.dogum_yeri || '-'}
+Telefon: ${kayit.telefon || '-'}
+E-Posta: ${kayit.eposta || '-'}
+
+EĞİTİM BİLGİLERİ
+--------------------------------
+Sınav Dili: ${kayit.sinav_dili || '-'}
+Öğrenim: ${kayit.ogrenim_durumu || '-'}
+Fakülte: ${kayit.fakulte || '-'}
+Bölüm: ${kayit.bolum || '-'}
+Öğrenci No: ${kayit.ogrenci_no || '-'}
+Mezuniyet: ${kayit.mezuniyet || '-'}
+
+İLETİŞİM / SİSTEM
+--------------------------------
+Adres: ${kayit.adres || '-'}
+Durum: ${kayit.durum || 'Bekliyor'}
+Red Sebebi: ${kayit.red_sebebi || '-'}
+Kayıt Tarihi: ${kayitTarihiFmt}`;
+            alert(detaylar);
+        }
+
+        async function durumGuncelle(id, yeniDurum) {
+            let redSebebi = null;
+            
+            if (yeniDurum === 'Reddedildi') {
+                redSebebi = prompt("Lütfen reddetme sebebini yazın (Örn: Kimlik belgesi okunamıyor):");
+                if (redSebebi === null) return; 
+            } else {
+                if (!confirm("Bu başvuruyu onaylamak istediğinize emin misiniz?")) return;
+            }
+
+            try {
+                const res = await fetch('/api/basvuru-durum', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, yeniDurum, redSebebi })
+                });
+                const data = await res.json();
+                
+                if (data.basarili) {
+                    verileriGetir(); 
+                } else {
+                    alert("Durum güncellenirken bir hata oluştu.");
+                }
+            } catch (err) {
+                alert("Sunucu bağlantı hatası.");
+            }
+        }
+
+        function dosyaAc(dosyaYolu) {
+            if (dosyaYolu && dosyaYolu !== "#" && dosyaYolu !== "null") {
+                window.open(dosyaYolu, '_blank');
+            } else {
+                alert("Dosya henüz yüklenmemiş veya bulunamıyor.");
+            }
+        }
+
+        function excelIndir() {
+            if (basvuruVerileri.length === 0) { alert("Veri bulunamadı."); return; }
+            
+            // "ID" başlığını "Sıra No" olarak güncelledik ve araları noktalı virgül (;) yaptık
+            let csvIcerigi = "Sıra No;Başvuru Kodu;Ad Soyad;TC Kimlik No;Doğum Tarihi;Doğum Yeri;Telefon;E-Posta;Sınav Dili;Öğrenim Durumu;Fakülte;Bölüm;Öğrenci No;Mezuniyet;Adres;Durum;Kayıt Tarihi\n";
+            
+            basvuruVerileri.forEach((satir, index) => {
+                const kayitTarihi = satir.basvuru_tarihi ? new Date(satir.basvuru_tarihi).toLocaleString('tr-TR') : '';
+                const dogumTarihi = satir.dogum_tarihi ? new Date(satir.dogum_tarihi).toLocaleDateString('tr-TR') : '';
+                
+                const guvenliAdres = satir.adres ? satir.adres.replace(/;/g, ' ').replace(/,/g, ' ').replace(/\n/g, ' ') : '';
+                const guncelDurum = satir.durum || 'Bekliyor';
+                
+                // Tablodaki sıra numarası (1, 2, 3, 4...)
+                const siraNo = index + 1;
+                
+                // 12 haneli öğrenci numarası satir.ogrenci_no alanından doğru sütuna yazılıyor
+                csvIcerigi += `${siraNo};${satir.gosterim_kodu};${satir.ad_soyad};${satir.tc_no};${dogumTarihi};${satir.dogum_yeri};${satir.telefon};${satir.eposta};${satir.sinav_dili};${satir.ogrenim_durumu};${satir.fakulte};${satir.bolum};${satir.ogrenci_no};${satir.mezuniyet};${guvenliAdres};${guncelDurum};${kayitTarihi}\n`;
+            });
+            
+            const blob = new Blob(["\ufeff" + csvIcerigi], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", "basvurular.csv");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        function sistemeGirisYap() {
+            const kAdi = document.getElementById('adminKullanici').value;
+            const sifre = document.getElementById('adminSifre').value;
+            fetch('/api/admin-giris', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ kullanici: kAdi, sifre: sifre })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.basarili) {
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('mainDashboard').style.display = 'block';
+                    verileriGetir(); 
+                } else {
+                    document.getElementById('hataMesaji').style.display = 'block';
+                }
+            });
+        }
+
+        function dilleriGetirAdmin() {
+            fetch('/api/diller')
+                .then(res => res.json())
+                .then(diller => {
+                    const liste = document.getElementById('dilListesi');
+                    liste.innerHTML = ''; 
+                    diller.forEach(dil => {
+                        liste.innerHTML += `
+                            <div style="background-color: #f1f5f9; padding: 8px 15px; border-radius: 20px; display: flex; align-items: center; gap: 10px; border: 1px solid #e2e8f0;">
+                                <span style="font-weight: 500; color: #475569;">${dil.dil_adi}</span>
+                                <button onclick="dilSil(${dil.id}, '${dil.dil_adi}')" style="background: none; border: none; color: #ef4444; cursor: pointer; font-weight: bold; font-size: 16px;">×</button>
+                            </div>`;
+                    });
+                }).catch(err => console.error("Diller alınamadı:", err));
+        }
+
+        async function dilEkle() {
+            const input = document.getElementById('yeniDilInput');
+            const dilAdi = input.value.trim();
+            if (!dilAdi) { alert("Lütfen bir dil adı yazın."); return; }
+            try {
+                const res = await fetch('/api/diller', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ dil_adi: dilAdi })
+                });
+                const data = await res.json();
+                if (data.basarili) { input.value = ''; dilleriGetirAdmin(); } 
+                else { alert("Hata oluştu."); }
+            } catch (err) { alert("Sunucu hatası."); }
+        }
+
+        async function dilSil(id, dilAdi) {
+            if (!confirm(`'${dilAdi}' dilini silmek istediğinize emin misiniz?`)) return;
+            try {
+                const res = await fetch(`/api/diller/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.basarili) { dilleriGetirAdmin(); } 
+                else { alert("Hata oluştu."); }
+            } catch (err) { alert("Sunucu hatası."); }
+        }
+    </script>
+</body>
+</html>

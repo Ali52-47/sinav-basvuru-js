@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balıkesir Üniversitesi - Sınav Başvuru Formu</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="form-container">
+        <header class="form-header">
+            <div class="logo-wrapper">
+                <img src="logo.jpg" alt="Balıkesir Üniversitesi Logosu" class="logo-img">
+            </div>
+            <h2>T.C. BALIKESİR ÜNİVERSİTESİ</h2>
+            <h3>MERKEZİ YABANCI DİL SINAVI BAŞVURU FORMU</h3>
+            <p class="subtitle">Lütfen aşağıdaki bilgileri eksiksiz doldurunuz.</p>
+        </header>
+
+        <!-- DUYURULAR BANNER ALANI -->
+        <div style="background-color: #ebf8ff; border-left: 5px solid #3182ce; padding: 15px 20px; margin-bottom: 25px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+            <h3 style="color: #2b6cb0; margin-top: 0; margin-bottom: 10px; font-size: 18px; display: flex; align-items: center;">
+                <span style="font-size: 22px; margin-right: 8px;">📢</span> Önemli Duyurular
+            </h3>
+            <ul style="margin: 0; padding-left: 20px; color: #2d3748; line-height: 1.6; font-size: 14px;">
+                <li><strong>Başvuru Tarihleri:</strong> 15 Ağustos 2026 - 30 Ağustos 2026</li>
+                <li><strong>Yabancı Dil Sınavı Tarihi:</strong> 5 Eylül 2026, Saat 10:00</li>
+                <li>Sınav giriş belgeleri, sınavdan 3 gün önce sistem üzerinden adayların erişimine açılacaktır.</li>
+                <li>Eksik veya hatalı evrak (vesikalık fotoğraf, kimlik) yükleyen adayların başvuruları geçersiz sayılacaktır.</li>
+            </ul>
+        </div>
+
+        <form id="basvuruForm" class="modern-form" action="/api/basvuru" method="POST" enctype="multipart/form-data">
+            
+            <div class="form-group">
+                <label for="adSoyad">Ad Soyad</label>
+                <!-- Sadece harf ve boşluk girilebilir, rakam veya özel karakter girilemez -->
+                <input type="text" id="adSoyad" name="adSoyad" placeholder="Örn: Ahmet Yılmaz" oninput="this.value = this.value.replace(/[^a-zA-ZğüşıöçĞÜŞİÖÇ\s]/g, '')" required>
+            </div>
+
+            <div class="form-row-group">
+                <div class="form-group">
+                    <label for="tcNo">TC Kimlik No</label>
+                    <input type="text" id="tcNo" name="tcNo" maxlength="11" placeholder="11 Haneli TC No" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+                </div>
+                <div class="form-group">
+                    <label for="dogumTarihi">Doğum Tarihi</label>
+                    <input type="date" id="dogumTarihi" name="dogumTarihi" required>
+                </div>
+            </div>
+
+            <div class="form-row-group">
+                <div class="form-group">
+                    <label for="dogumYeri">Doğum Yeri</label>
+                    <input type="text" id="dogumYeri" name="dogumYeri" placeholder="Örn: Balıkesir" required>
+                </div>
+                <div class="form-group">
+                    <label for="telefon">Cep Telefonu</label>
+<input type="tel" id="telefon" name="telefon" maxlength="14" oninput="telefonFormatla(this)" placeholder="05XX XXX XX XX" required>
+                </div>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="eposta">E-Posta Adresi <span class="note">(*Sınava giriş için doğru olması önemlidir)</span></label>
+                <input type="email" id="eposta" name="eposta" placeholder="ornek@ogrenci.balikesir.edu.tr" required>
+            </div>
+
+            <div class="form-row-group">
+                <div class="form-group">
+                    <label for="sinavDili">Sınav Dili</label>
+                    <select id="sinavDili" name="sinavDili" required>
+                        <option value="" disabled selected>Seçiniz</option>
+                        <option value="Ingilizce">İngilizce</option>
+                        <option value="Almanca">Almanca</option>
+                        <option value="Fransizca">Fransızca</option>
+                    </select>
+                </div>
+                
+                <!-- ÖĞRENİM DURUMU (Seçilince Fakülte Kutusunu Tetikleyecek) -->
+                <div class="form-group">
+                    <label for="ogrenimDurumu">Öğrenim Durumu</label>
+                    <select id="ogrenimDurumu" name="ogrenimDurumu" onchange="fakulteleriGetir()" required>
+                        <option value="" disabled selected>Seçiniz</option>
+                        <option value="Onlisans">Önlisans</option>
+                        <option value="Lisans">Lisans</option>
+                        <option value="YuksekLisans">Yüksek Lisans</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- FAKÜLTE VE BÖLÜM SEÇİM ALANI (İkisi de başlangıçta kilitli) -->
+            <div class="form-row-group">
+                <div style="display: flex; gap: 20px; width: 100%;">
+                    <div class="form-group" style="flex: 1;">
+                        <label for="fakulte" style="display: block; margin-bottom: 8px; font-weight: 600; color: #334155;">Fakülte / Yüksekokul / Enstitü</label>
+                        <select id="fakulte" name="fakulte" onchange="bolumleriGetir()" required disabled style="width: 100%; padding: 12px; border: 2px solid #cbd5e1; border-radius: 8px; font-size: 16px; outline: none; background-color: #f8fafc;">
+                            <option value="" disabled selected>Önce öğrenim durumu seçiniz</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="flex: 1;">
+                        <label for="bolum" style="display: block; margin-bottom: 8px; font-weight: 600; color: #334155;">Bölüm / Program</label>
+                        <select id="bolum" name="bolum" required disabled style="width: 100%; padding: 12px; border: 2px solid #cbd5e1; border-radius: 8px; font-size: 16px; outline: none; background-color: #f8fafc;">
+                            <option value="" disabled selected>Önce birim seçmelisiniz</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row-group">
+                <div class="form-group">
+                    <label for="ogrenciNo">Öğrenci No</label>
+                    <!-- Sadece rakam girilebilir ve en fazla 12 hane olabilir -->
+                    <input type="text" id="ogrenciNo" name="ogrenciNo" maxlength="12" placeholder="Öğrenci Numaranız" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                </div>
+                <div class="form-group">
+                    <label for="mezuniyet">Mezun Olunan Fakülte/Bölüm</label>
+                    <input type="text" id="mezuniyet" name="mezuniyet" placeholder="Varsa belirtiniz">
+                </div>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="adres">Açık Adres</label>
+                <textarea id="adres" name="adres" rows="2" placeholder="İkamet adresinizi giriniz..." required></textarea>
+            </div>
+
+            <div class="form-row-group upload-group full-width">
+                <div class="form-group file-upload">
+                    <label for="kimlikDosya">Nüfus Cüzdanı Fotokopisi <br><small>(.pdf, .jpg, .png)</small></label>
+                    <input type="file" id="kimlikDosya" name="kimlikDosya" accept=".pdf, .jpg, .jpeg, .png" required>
+                </div>
+                <div class="form-group file-upload">
+                    <label for="fotograf">Vesikalık Fotoğraf <br><small>(.pdf, .jpg, .png)</small></label>
+                    <input type="file" id="fotograf" name="fotograf" accept=".pdf, .jpg, .jpeg, .png" required>
+                </div>
+            </div>
+
+            <!-- MATEMATİKSEL CAPTCHA ALANI -->
+            <div id="captchaContainer" style="margin-top: 30px; margin-bottom: 30px; background-color: #f8fafc; padding: 25px; border-radius: 12px; border: 2px dashed #cbd5e1; text-align: center; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+                <label id="captchaLabel" style="display: block; margin-bottom: 15px; color: #334155; font-weight: bold; font-size: 18px;">Güvenlik Doğrulaması: Bekleniyor...</label>
+                <p style="color: #64748b; font-size: 14px; margin-top: -10px; margin-bottom: 20px;">Lütfen yukarıdaki toplama işleminin sonucunu giriniz.</p>
+                
+                <input type="text" id="captchaGiris" placeholder="Cevabı buraya yazınız..." oninput="this.value = this.value.replace(/[^0-9]/g, '')" required style="width: 100%; max-width: 400px; padding: 18px; font-size: 20px; text-align: center; border: 2px solid #94a3b8; border-radius: 8px; outline: none; font-weight: 500; color: #0f172a;">
+            </div>
+            
+            <div class="form-group full-width checkbox-group">
+                <label class="custom-checkbox">
+                    <input type="checkbox" id="onay" name="onay" required>
+                    <span class="checkmark"></span>
+                    Bilgilerimin doğruluğunu ve sınav kurallarını kabul ediyorum.
+                </label>
+            </div>
+
+            <div class="form-group full-width submit-group">
+                <button type="submit" class="btn-submit">Başvuruyu Tamamla</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- JAVASCRIPT KODLARI -->
+    <script>
+        // --- 1. CAPTCHA GÜVENLİK SİSTEMİ (Matematiksel) ---
+        let gecerliCaptchaCevabi = 0; 
+
+        function captchaYenile() {
+            // 1 ile 9 arasında tek basamaklı sayı üret
+            const sayi1 = Math.floor(Math.random() * 9) + 1; 
+            
+            // 10 ile 99 arasında iki basamaklı sayı üret
+            const sayi2 = Math.floor(Math.random() * 90) + 10; 
+            
+            // Doğru cevabı hafızaya al
+            gecerliCaptchaCevabi = sayi1 + sayi2;
+            
+            // Soruyu ekrana yazdır
+            document.getElementById('captchaLabel').innerText = `Güvenlik Doğrulaması: ${sayi1} + ${sayi2} kaçtır?`;
+        }
+
+        // --- 2. ÜNİVERSİTE VERİTABANI KATEGORİLERİ ---
+        
+        // Aşama 1: Öğrenim durumuna göre hangi birimlerin gösterileceği
+        const ogrenimSeviyeleri = {
+            "Onlisans": [
+                "Altınoluk Meslek Yüksekokulu", "Ayvalık Meslek Yüksekokulu", "Balıkesir Meslek Yüksekokulu",
+                "Bigadiç Meslek Yüksekokulu", "Burhaniye Meslek Yüksekokulu", "Dursunbey Meslek Yüksekokulu",
+                "Edremit Meslek Yüksekokulu", "Havran Meslek Yüksekokulu", "İvrindi Sağlık Hizmetleri Meslek Yüksekokulu",
+                "Kepsut Meslek Yüksekokulu", "Savaştepe Meslek Yüksekokulu", "Sındırgı Meslek Yüksekokulu",
+                "Susurluk Tarım Ve Orman Meslek Yüksekokulu"
+            ],
+            "Lisans": [
+                "Mühendislik Fakültesi", "Necatibey Eğitim Fakültesi", "Fen-Edebiyat Fakültesi", 
+                "İktisadi ve İdari Bilimler Fakültesi", "Sağlık Bilimleri Fakültesi", "Tıp Fakültesi", 
+                "Mimarlık Fakültesi", "İlahiyat Fakültesi", "Veteriner Fakültesi", "Turizm Fakültesi", 
+                "Spor Bilimleri Fakültesi", "Burhaniye Uygulamalı Bilimler Fakültesi", "Güzel Sanatlar Fakültesi",
+                "Edremit Sivil Havacılık Yüksekokulu", "Yabancı Diller Yüksekokulu",
+                "Atatürk İlkeleri ve İnkılap Tarihi Bölümü", "Enformatik Bölümü", "Türk Dili Bölümü"
+            ],
+            "YuksekLisans": [
+                "Fen Bilimleri Enstitüsü", "Sağlık Bilimleri Enstitüsü", "Sosyal Bilimler Enstitüsü", "Edremit Zeytincilik Enstitüsü"
+            ]
+        };
+
+        // Aşama 2: Fakülte ve Yüksekokullara ait bölümler
+        const baunBirimler = {
+            "Mühendislik Fakültesi": [
+                "Bilgisayar Mühendisliği", "Elektrik-Elektronik Mühendisliği", "Endüstri Mühendisliği", 
+                "İnşaat Mühendisliği", "Makine Mühendisliği", "Çevre Mühendisliği", "Jeoloji Mühendisliği", "Gıda Mühendisliği"
+            ],
+            "Necatibey Eğitim Fakültesi": [
+                "Bilgisayar ve Öğretim Teknolojileri Eğitimi", "Fen Bilgisi Eğitimi", "İlköğretim Matematik Eğitimi", 
+                "İngilizce Öğretmenliği", "Sınıf Öğretmenliği", "Türkçe Öğretmenliği", "Rehberlik ve Psikolojik Danışmanlık", "Biyoloji Eğitimi", "Fizik Eğitimi", "Kimya Eğitimi"
+            ],
+            "Fen-Edebiyat Fakültesi": [
+                "Biyoloji", "Fizik", "Kimya", "Matematik", "Sosyoloji", "Tarih", "Türk Dili ve Edebiyatı", "Coğrafya", "Moleküler Biyoloji ve Genetik"
+            ],
+            "İktisadi ve İdari Bilimler Fakültesi": [
+                "İktisat", "İşletme", "Siyaset Bilimi ve Kamu Yönetimi", "Uluslararası Ticaret ve Lojistik", "Maliye"
+            ],
+            "Sağlık Bilimleri Fakültesi": [
+                "Ebelik", "Hemşirelik", "Fizyoterapi ve Rehabilitasyon"
+            ],
+            "Tıp Fakültesi": ["Tıp"],
+            "Mimarlık Fakültesi": ["Mimarlık", "İç Mimarlık"],
+            "İlahiyat Fakültesi": ["İlahiyat"],
+            "Veteriner Fakültesi": ["Veterinerlik"],
+            "Turizm Fakültesi": ["Turizm İşletmeciliği", "Turizm Rehberliği", "Gastronomi ve Mutfak Sanatları"],
+            "Spor Bilimleri Fakültesi": ["Beden Eğitimi ve Spor Öğretmenliği", "Antrenörlük Eğitimi", "Spor Yöneticiliği"],
+            "Burhaniye Uygulamalı Bilimler Fakültesi": ["Uluslararası Ticaret", "Bankacılık ve Finans", "Turizm İşletmeciliği"],
+            "Güzel Sanatlar Fakültesi": ["Resim", "Baskı Sanatları", "Seramik"],
+            
+            // Enstitüler
+            "Fen Bilimleri Enstitüsü": ["Fen Bilimleri Yüksek Lisans / Doktora"],
+            "Sağlık Bilimleri Enstitüsü": ["Sağlık Bilimleri Yüksek Lisans / Doktora"],
+            "Sosyal Bilimler Enstitüsü": ["Sosyal Bilimler Yüksek Lisans / Doktora"],
+            "Edremit Zeytincilik Enstitüsü": ["Zeytincilik Araştırmaları"],
+
+            // Yüksekokullar
+            "Edremit Sivil Havacılık Yüksekokulu": ["Havacılık Yönetimi"],
+            "Yabancı Diller Yüksekokulu": ["Mütercim-Tercümanlık"],
+
+            // Meslek Yüksekokulları
+            "Altınoluk Meslek Yüksekokulu": ["Bilgisayar Programcılığı", "Tıbbi ve Aromatik Bitkiler", "Kimya Teknolojisi"],
+            "Ayvalık Meslek Yüksekokulu": ["Turizm ve Otel İşletmeciliği", "Mimari Restorasyon", "Yönetim Organizasyon"],
+            "Balıkesir Meslek Yüksekokulu": ["Bilgisayar Programcılığı", "Elektronik Teknolojisi", "Makine", "Muhasebe ve Vergi Uygulamaları", "İşletme Yönetimi"],
+            "Bigadiç Meslek Yüksekokulu": ["Bankacılık ve Sigortacılık", "Halkla İlişkiler ve Tanıtım", "Lojistik"],
+            "Burhaniye Meslek Yüksekokulu": ["İşletme Yönetimi", "Muhasebe ve Vergi Uygulamaları", "Turizm ve Otel İşletmeciliği"],
+            "Dursunbey Meslek Yüksekokulu": ["Ormancılık ve Orman Ürünleri", "İş Sağlığı ve Güvenliği"],
+            "Edremit Meslek Yüksekokulu": ["Bilgisayar Programcılığı", "Elektronik Teknolojisi", "Makine", "Mekatronik"],
+            "Havran Meslek Yüksekokulu": ["Büro Yönetimi ve Yönetici Asistanlığı", "Lojistik"],
+            "İvrindi Sağlık Hizmetleri Meslek Yüksekokulu": ["İlk ve Acil Yardım", "Tıbbi Dokümantasyon ve Sekreterlik", "Tıbbi Görüntüleme Teknikleri"],
+            "Kepsut Meslek Yüksekokulu": ["Özel Güvenlik ve Koruma", "Adalet"],
+            "Savaştepe Meslek Yüksekokulu": ["Maliye", "Tıbbi Dokümantasyon ve Sekreterlik", "Çocuk Gelişimi"],
+            "Sındırgı Meslek Yüksekokulu": ["Muhasebe ve Vergi Uygulamaları", "Turizm ve Otel İşletmeciliği"],
+            "Susurluk Tarım Ve Orman Meslek Yüksekokulu": ["Gıda Teknolojisi", "Süt ve Besi Hayvancılığı", "Laborant ve Veteriner Sağlık"],
+
+            // Rektörlüğe Bağlı Bölümler
+            "Atatürk İlkeleri ve İnkılap Tarihi Bölümü": ["Ortak Zorunlu Dersler"],
+            "Enformatik Bölümü": ["Ortak Zorunlu Dersler"],
+            "Türk Dili Bölümü": ["Ortak Zorunlu Dersler"]
+        };
+
+        // --- 3. OLAY DİNLEYİCİLERİ VE FONKSİYONLAR ---
+        
+        // Sayfa ilk açıldığında Captcha'yı yükle ve dinamik dilleri getir
+        window.addEventListener('DOMContentLoaded', () => {
+            captchaYenile();
+            
+            // Sunucudan sınav dillerini çek ve kutuyu doldur
+            fetch('/api/diller')
+                .then(res => res.json())
+                .then(diller => {
+                    const dilSelect = document.getElementById('sinavDili');
+                    dilSelect.innerHTML = '<option value="" disabled selected>Seçiniz</option>';
+                    diller.forEach(dil => {
+                        const option = document.createElement('option');
+                        option.value = dil.dil_adi;
+                        option.textContent = dil.dil_adi;
+                        dilSelect.appendChild(option);
+                    });
+                })
+                .catch(err => console.error("Diller yüklenirken hata oluştu:", err));
+        });
+
+        // 1. Aşama: Öğrenim Durumu Seçilince Fakülteleri Getir
+        function fakulteleriGetir() {
+            const seviyeSelect = document.getElementById('ogrenimDurumu');
+            const fakulteSelect = document.getElementById('fakulte');
+            const bolumSelect = document.getElementById('bolum');
+            
+            const secilenSeviye = seviyeSelect.value;
+
+            // Fakülte kutusunu temizle ve aktif et
+            fakulteSelect.innerHTML = '<option value="" disabled selected>Lütfen birim seçiniz...</option>';
+            fakulteSelect.disabled = false;
+            fakulteSelect.style.backgroundColor = "white";
+
+            // Öğrenim durumu değiştiği için Bölüm kutusunu tekrar kilitle ve sıfırla
+            bolumSelect.innerHTML = '<option value="" disabled selected>Önce birim seçmelisiniz</option>';
+            bolumSelect.disabled = true;
+            bolumSelect.style.backgroundColor = "#f8fafc";
+
+            // İlgili öğrenim seviyesindeki birimleri (fakülte/myo/enstitü) kutuya ekle
+            if (ogrenimSeviyeleri[secilenSeviye]) {
+                ogrenimSeviyeleri[secilenSeviye].forEach(fakulte => {
+                    const option = document.createElement('option');
+                    option.value = fakulte;
+                    option.textContent = fakulte;
+                    fakulteSelect.appendChild(option);
+                });
+            }
+        }
+
+        // 2. Aşama: Fakülte seçildiğinde Bölüm listesini güncelle
+        function bolumleriGetir() {
+            const fakulteSelect = document.getElementById('fakulte');
+            const bolumSelect = document.getElementById('bolum');
+            const secilenFakulte = fakulteSelect.value;
+            
+            // Bölüm kutusunu temizle ve aktif et
+            bolumSelect.innerHTML = '<option value="" disabled selected>Lütfen bölüm seçiniz...</option>';
+            bolumSelect.disabled = false;
+            bolumSelect.style.backgroundColor = "white";
+
+            // Seçilen fakülteye ait bölümleri listeye ekle
+            if (baunBirimler[secilenFakulte]) {
+                baunBirimler[secilenFakulte].forEach(bolum => {
+                    const option = document.createElement('option');
+                    option.value = bolum;
+                    option.textContent = bolum;
+                    bolumSelect.appendChild(option);
+                });
+            }
+        }
+
+        // Form gönderilmeye çalışıldığında güvenliği (Matematik Captcha) kontrol et
+        document.getElementById('basvuruForm').addEventListener('submit', function(event) {
+            // Kullanıcının girdiği cevabı tam sayıya çeviriyoruz
+            const girilenCevap = parseInt(document.getElementById('captchaGiris').value.trim());
+
+            if (girilenCevap !== gecerliCaptchaCevabi) {
+                // Cevap yanlışsa formun gönderilmesini durdur
+                event.preventDefault();
+                alert('Güvenlik işleminin sonucu hatalı! Lütfen tekrar deneyiniz.');
+                
+                // Soruyu yenile ve kutuyu odakla
+                captchaYenile();
+                document.getElementById('captchaGiris').value = '';
+                document.getElementById('captchaGiris').focus();
+            }
+        });
+        function telefonFormatla(input) {
+    // Sadece rakamları al
+    let rakamlar = input.value.replace(/\D/g, ''); 
+    
+    // Maksimum 11 rakam girilmesine izin ver
+    if (rakamlar.length > 11) rakamlar = rakamlar.substring(0, 11);
+
+    let formatli = '';
+    if (rakamlar.length > 0) formatli = rakamlar.substring(0, 4); // 0543
+    if (rakamlar.length > 4) formatli += ' ' + rakamlar.substring(4, 7); // 378
+    if (rakamlar.length > 7) formatli += ' ' + rakamlar.substring(7, 9); // 23
+    if (rakamlar.length > 9) formatli += ' ' + rakamlar.substring(9, 11); // 56
+
+    input.value = formatli;
+}
+    </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+Geliştirmiş olduğum T.C. Balıkesir Üniversitesi Merkezi Yabancı Dil Sınavı Başvuru ve Yönetim Sistemi projesinin kurulumu ve işleyişi hakkında kısa bir rehber olması açısından bu dosyayı hazırladım. Projeyi olabildiğince sade, anlaşılır ve güvenli bir altyapıyla kurmaya özen gösterdim.
+
+İşte sistemi ayağa kaldırmak ve incelemek için bilmeniz gerekenler:
+
+1. Proje neden bu boyutta / node_modules neden yok?
+Dosya boyutunu gereksiz yere şişirmemek ve farklı işletim sistemlerinde (Windows/Mac/Linux) olası kütüphane çakışmalarının önüne geçmek için projeye node_modules klasörünü dahil etmedim. Zaten projenin ihtiyaç duyduğu tüm paketler package.json dosyasında kayıtlı. Küçük birkaç adımla saniyeler içinde kendi tarafınızda kurabilirsiniz.
+
+2. Projeyi bilgisayarınızda nasıl çalıştıracaksınız?
+
+Proje klasörünü bilgisayarınızda açın ve terminalinizi (komut satırınızı) bu klasörün dizinine konumlandırın.
+
+Gerekli kütüphanelerin otomatik inmesi için terminale şunu yazın:
+npm install
+
+Kurulum bittikten sonra sunucuyu başlatmak için şu komutu çalıştırın:
+node server.js
+
+Tarayıcınızı açıp adres çubuğuna http://localhost:3000 yazarak başvuru formuna ulaşabilirsiniz.
+
+3. Sistemde neler var, nasıl test edebilirsiniz?
+
+Aday Başvuru Ekranı (index.html): Öğrenciler buradan bilgilerini giriyor. TC kimlik, telefon ve öğrenci numarası alanlarında hatalı tuşlamaları veya harf girmelerini engelleyen anlık kısıtlamalar (regex ve otomatik formatlama) koydum. Ayrıca form gönderilmeden önce rastgele üretilen basit bir matematiksel güvenlik sorusu (captcha) çözülmesi gerekiyor.
+
+Yönetim Paneli (admin.html): Gelen başvuruları listeleyebileceğiniz, onaylayıp reddedebileceğiniz ve yüklenen evrakları (kimlik fotokopisi, vesikalık fotoğraf) tek tıkla görüntüleyebileceğiniz bir arayüz hazırladım.
+
+Excel / CSV Desteği: Yönetim panelinden aldığınız Excel raporlarının sütunları bozulmasın diye noktalı virgül (;) ve Türkçe karakter uyumlu BOM kodlaması kullandım, böylece doğrudan düzgün açılıyor.
